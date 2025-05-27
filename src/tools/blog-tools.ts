@@ -43,7 +43,13 @@ export async function getBlogPosts(params: {
             type: "text",
             text: `Blog Post: ${data.title || data.slug}\nSlug: ${
               data.slug
-            }\nBody: ${typeof data.body === "string" ? data.body : (data.body && data.body.html ? data.body.html : JSON.stringify(data.body) || "(no body)")}`,
+            }\nBody: ${
+              typeof data.body === "string"
+                ? data.body
+                : data.body && data.body.html
+                ? data.body.html
+                : JSON.stringify(data.body) || "(no body)"
+            }`,
           },
         ],
         data: data,
@@ -112,24 +118,13 @@ export async function getBlogPosts(params: {
 
 export async function createBlogPost(params: {
   title: string;
-  body: any;
+  body: string;
   slug: string;
   categoryId: number;
 }) {
   try {
     const { title, body, slug, categoryId } = params;
-    if (typeof body !== "object" || body === null) {
-      const errMsg = "'body' must be a JSON object.";
-      console.error("[createBlogPost]", errMsg, { body });
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: ${errMsg}`,
-          },
-        ],
-      };
-    }
+
     const { data, error } = await getClient()
       .from("blog_posts")
       .insert({
@@ -140,7 +135,11 @@ export async function createBlogPost(params: {
       })
       .select();
     if (error) {
-      console.error("[createBlogPost] Error creating blog post:", error.message, { error });
+      console.error(
+        "[createBlogPost] Error creating blog post:",
+        error.message,
+        { error }
+      );
       return {
         content: [
           {
